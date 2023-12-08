@@ -1,0 +1,45 @@
+<footer>
+    © obinnacode. All rights reserved. 
+</footer>
+
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+<script>
+    //Send error message when user submits form without the ratings field
+    function validateForm() {
+        // Check if a radio button is selected
+        const ratingInputs = document.getElementsByName('rating');
+        const selectedRating = Array.from(ratingInputs).find(input => input.checked);
+
+        if (!selectedRating) {
+            document.getElementById('error-message').innerText = 'Please select a rating';
+        }
+    }
+
+    async function deleteData(title) {
+        const confirmed = window.confirm("Are you sure you want to delete this item?");
+
+        // Check if the user confirmed
+        if (!confirmed) {
+            console.log('Operation canceled by user.');
+            return;
+        }
+        try {
+            const response = await fetch("/delete/" + title, {
+                method: "DELETE",
+            });
+
+            if (!response.ok) {
+                throw new Error('Network response was not ok');
+            }
+
+            // Perform client-side redirect
+            window.location.href = "/";
+        } catch (error) {
+            console.error('There was a problem with the fetch operation:', error);
+        }
+    }
+</script>
+<script src="/index.js"></script>
+</body>
+
+</html>

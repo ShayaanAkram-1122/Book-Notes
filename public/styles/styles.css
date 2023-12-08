@@ -1,0 +1,196 @@
+@import url('https://cdnjs.cloudflare.com/ajax/libs/normalize/8.0.1/normalize.css');
+
+a {
+    text-decoration: none;
+    color: inherit;
+    cursor: pointer;
+}
+
+button:hover {
+    cursor: pointer;
+}
+
+ul {
+    display: none;
+}
+
+body {
+    font-family: Arial, sans-serif;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+    align-items: center;
+    height: 100vh;
+    background-color: #f4f4f4;
+}
+
+header {
+    display: flex;
+    justify-content: center;
+    height: 70px;
+    background-color: #008080;
+    box-sizing: border-box;
+    width: 100%;
+    color: white;
+}
+
+.hero {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    width: 70%;
+}
+
+.hero p {
+    margin-top: 30px;
+}
+
+h1 {
+    margin-top: 1rem;
+    margin-bottom: 1rem;
+}
+
+.book-search {
+    margin-top: 20px;
+}
+
+.dropdown {
+    position: relative;
+}
+
+.listItem {
+    display: flex;
+    flex-direction: row;
+}
+
+.listItem>div p {
+    margin-top: 0;
+    margin-left: 10px;
+    margin-bottom: 5px;
+}
+
+.book-search input {
+    width: 300px;
+    padding: 5px;
+    font-size: 16px;
+    box-sizing: border-box;
+}
+.book-search input[type="submit"] {
+    width: 100px;
+    padding: 5px;
+    font-size: 16px;
+    box-sizing: border-box;
+}
+
+input[type="submit"] {
+    min-width: 50px;    
+}
+
+input[type="submit"]:hover{
+    cursor: pointer;
+}
+
+ul {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    position: absolute;
+    width: 300px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    background-color: #fff;
+    display: none;
+}
+
+li {
+    padding: 10px;
+    cursor: pointer;
+}
+
+li:hover {
+    background-color: #f0f0f0;
+}
+
+.book {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    margin-bottom: 20px;
+}
+
+.book>img {
+    margin-top: 20px;
+    margin-right: 20px;
+    height: fit-content;
+    min-width: 25%;
+}
+
+.books {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 70%;
+}
+
+.sort {
+    margin-bottom: 20px;
+    align-self: flex-start;
+}
+
+.edit {
+    margin-top: 1rem;
+}
+
+.checked {
+    color: orange;
+}
+
+label>span:hover {
+    cursor: pointer;
+}
+
+/* hide radio element */
+input[type="radio"] {    
+    position: absolute;
+    left: -9999px;
+    clip: rect(1px, 1px, 1px, 1px);
+}
+
+textarea {
+    min-height: 300px;
+    min-width: 700px;
+    text-align: justify;
+    box-sizing: border-box;
+    padding: 10px;
+}
+.blank-cover{
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    background-color: #008080;
+    height: 78%;
+    min-width: 25%;
+    margin-top: 20px;
+    margin-right: 20px;
+}
+.blank-cover>div {
+    border: solid white 1px;
+    width: 90%;
+    height: 90%;
+    box-sizing: border-box;
+    padding: 20px;
+}
+
+.book-details{
+    width: 75%;
+}
+
+footer{
+    margin-top: 20px;
+    
+}
