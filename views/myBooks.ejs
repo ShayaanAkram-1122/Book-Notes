@@ -1,0 +1,53 @@
+<%- include('partials/header.ejs') %>
+
+<h2>My Books</h2>
+
+<% if (books.length === 0) { %>
+  <p>No books saved yet.</p>
+<% } else { %>
+  <div class="books">
+    <% books.forEach(book => { %>
+      <div class="book">
+        <% if (book.cover_id === 0 || !book.cover_id) { %>
+          <div class="blank-cover">
+            <div>
+              <h3><%= book.title %></h3>
+              <h4>By <%= book.author %></h4>
+            </div>
+          </div>
+        <% } else { %>
+          <img src="https://covers.openlibrary.org/b/id/<%= book.cover_id %>-L.jpg"
+               srcset="https://covers.openlibrary.org/b/id/<%= book.cover_id %>-L.jpg 2x"
+               alt="Book cover">
+        <% } %>
+
+        <div class="book-details">
+          <h2><%= book.title %></h2>
+          <h3>By <%= book.author %></h3>
+          <h3>Review:</h3>
+          <p><%= book.review_text %></p>
+          <p><strong>Review Date: </strong><%= book.review_date %></p>
+
+          <h3>Rating</h3>
+          <div class="rating">
+            <% for (let i = 0; i < book.rating; i++) { %>
+              <span class="fa fa-star checked"></span>
+            <% } %>
+            <% for (let i = 0; i < (5 - book.rating); i++) { %>
+              <span class="fa fa-star"></span>
+            <% } %>
+          </div>
+
+          <form action="/wishlist/add" method="POST" style="margin-top: 10px;">
+              <input type="hidden" name="bookId" value="<%= book.book_id %>">
+              <button type="submit" class="btn btn-outline-primary">
+                ❤️ Add to Wishlist
+              </button>
+          </form>
+        </div>
+      </div>
+    <% }); %>
+  </div>
+<% } %>
+
+<%- include('partials/footer.ejs') %>

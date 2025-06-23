@@ -2,31 +2,34 @@
 <html lang="en">
 
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <!-- Font Awesome Icon Library -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
-    <link rel="stylesheet" href="/styles/styles.css">
-    <title>Book Notes</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Book Notes</title>
+  
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css" />
+  
+  <link rel="stylesheet" href="/styles/header.css" />
+  <link rel="stylesheet" href="/styles/addBook.css" />
+  <link rel="stylesheet" href="/styles/search.css" />
 </head>
 
 <body>
-    <header>
-        <div class="hero">
-            <h1>Book Notes</h1>
-            <a href="/">
-                <p>Home</p>
-            </a>            
-        </div>
-        
-    </header>
-
-    <div>
-        <form class="book-search" action="/search" method="get">
-            <input type="text" name="search" id="searchInput" autocomplete="off" placeholder="Enter book name, author or isbn">
-            
-            <div class="dropdown">
-                <ul id="dropdownList"></ul>
-            </div>
-        </form>
+  <header>
+    <div class="hero">
+      <h1 class="site-title">📚 Book Notes</h1>
+      <nav class="nav-menu">
+        <ul class="nav-list">
+          <li><a href="/home" class="nav-link"><i class="fa fa-home"></i> Home</a></li>
+          <li><a href="/book" class="nav-link"><i class="fa fa-plus"></i> Add Books</a></li>
+          <li><a href="/myBooks" class="nav-link"><i class="fa fa-book"></i> Display Books</a></li>
+          <li><a href="/sort" class="nav-link"><i class="fa fa-sort"></i> Sort Books</a></li>
+          <li><a href="/wishlist" class="nav-link"><i class="fa fa-heart"></i> Wishlist</a></li>
+          <li><a href="/contact" class="nav-link"><i class="fa fa-envelope"></i> Contact</a></li>
+          <li><a href="/logout" class="nav-link logout-link"><i class="fa fa-sign-out"></i> Logout</a></li>
+        </ul>
+      </nav>
     </div>
+  </header>
+</body>
+
+</html>

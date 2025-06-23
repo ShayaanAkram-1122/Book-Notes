@@ -1,0 +1,48 @@
+<%- include('partials/header.ejs') %>
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link rel="stylesheet" href="/styles/register.css" />
+</head>
+
+<div class="login-container">
+  <form action="/" method="post" class="login-box">
+    <h2>Register Yourself</h2>
+
+    <div class="form-group">
+      <label for="name">Full Name</label>
+      <input type="text" name="name" id="name" required />
+    </div>
+
+    <div class="form-group">
+      <label for="email">Email</label>
+      <input type="email" name="email" id="email" required />
+    </div>
+
+    <div class="form-group">
+      <label for="phone">Phone Number</label>
+      <input type="text" name="phone" id="phone" required />
+    </div>
+
+    <div class="form-group">
+      <label for="password">Password</label>
+      <input type="password" name="password" id="password" required />
+    </div>
+
+    <div class="form-options">
+      <label>
+        <input type="checkbox" name="remember" />
+        Remember me
+      </label>
+    </div>
+
+    <button type="submit">Create Account</button>
+
+    <div class="form-footer">
+      <p>Already have an account? <a href="/login">Sign in</a></p>
+    </div>
+  </form>
+</div>
+
+<%- include('partials/footer.ejs') %>

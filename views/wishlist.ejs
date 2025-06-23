@@ -1,0 +1,26 @@
+<%- include('partials/header.ejs') %>
+
+<h2>My Wishlist</h2>
+
+<% if (books.length === 0) { %>
+  <p>Your wishlist is empty.</p>
+<% } else { %>
+  <div class="books">
+    <% books.forEach(book => { %>
+      <div class="book">
+            <img src="https://covers.openlibrary.org/b/id/<%= book.cover_id %>-L.jpg"
+            srcset="https://covers.openlibrary.org/b/id/<%= book.cover_id %>-L.jpg 2x"
+            alt="Book cover">
+        <h3><%= book.title %></h3>
+        <h4>by <%= book.author %></h4>
+        <p><%= book.review_text || 'No review yet.' %></p>
+        <form action="/wishlist/remove" method="POST">
+          <input type="hidden" name="bookId" value="<%= book.book_id %>">
+          <button type="submit">Remove from Wishlist</button>
+        </form>
+      </div>
+    <% }) %>
+  </div>
+<% } %>
+
+<%- include('partials/footer') %>

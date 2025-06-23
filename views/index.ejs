@@ -50,15 +50,20 @@
                                                         <% } %>
                                 </div>
 
-                                <div class="button edit">
+                                    <div class="button-edit">
                                     <a
                                         href="/book?title=<%=book.title%>&author=<%= book.author %>&coverId=<%= book.cover_id %>">
+                                        <br>
+
                                         <button type="button">Edit</button>
+
                                     </a>
+                                    </div>
                                     
-                                    <button onclick="deleteData('<%=book.book_id%>')" type="button">Delete</button>
+                                    <div class="button-edit-delete">
+                                    <button onclick="deleteData('<%=book.book_id%>')" type="button"> Delete</button>
                                     
-                                </div>
+                                    </div>
                             </div>
 
 

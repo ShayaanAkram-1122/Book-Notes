@@ -1,0 +1,34 @@
+DROP TABLE IF EXISTS book_reviews, books;
+
+CREATE TABLE users (
+    id SERIAL PRIMARY KEY UNIQUE NOT NULL,
+    name VARCHAR(255) NOT NULL,
+    email VARCHAR(255) UNIQUE NOT NULL,
+    phone_number VARCHAR(255) UNIQUE NOT NULL,
+    password TEXT NOT NULL   
+);
+
+CREATE TABLE books (
+    book_id SERIAL PRIMARY KEY,
+    title VARCHAR(255) NOT NULL,
+    author VARCHAR(255),
+    cover_id INTEGER,
+    id INTEGER REFERENCES users(id) ON DELETE CASCADE
+);
+
+CREATE TABLE book_reviews (
+    review_id SERIAL PRIMARY KEY,
+    book_id INTEGER REFERENCES books(book_id) ON DELETE CASCADE,
+    id INTEGER REFERENCES users(id) ON DELETE CASCADE,
+    rating INTEGER CHECK (rating >= 1 AND rating <= 5),
+    review_text TEXT,
+    review_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+
+CREATE TABLE wishlist (
+  id SERIAL PRIMARY KEY,
+  user_id INTEGER REFERENCES users(id) ON DELETE CASCADE,
+  book_id INTEGER REFERENCES books(book_id) ON DELETE CASCADE,
+  added_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
