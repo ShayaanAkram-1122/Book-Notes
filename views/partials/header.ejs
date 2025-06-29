@@ -5,31 +5,90 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Book Notes</title>
-  
+
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css" />
   
   <link rel="stylesheet" href="/styles/header.css" />
   <link rel="stylesheet" href="/styles/addBook.css" />
   <link rel="stylesheet" href="/styles/search.css" />
+
+  <!-- Error handling and debugging script -->
+  <script src="/partials.js"></script>
 </head>
 
 <body>
   <header>
     <div class="hero">
       <h1 class="site-title">📚 Book Notes</h1>
+
       <nav class="nav-menu">
-        <ul class="nav-list">
+        <ul class="nav-list" id="main-menu">
           <li><a href="/home" class="nav-link"><i class="fa fa-home"></i> Home</a></li>
           <li><a href="/book" class="nav-link"><i class="fa fa-plus"></i> Add Books</a></li>
           <li><a href="/myBooks" class="nav-link"><i class="fa fa-book"></i> Display Books</a></li>
-          <li><a href="/sort" class="nav-link"><i class="fa fa-sort"></i> Sort Books</a></li>
           <li><a href="/wishlist" class="nav-link"><i class="fa fa-heart"></i> Wishlist</a></li>
           <li><a href="/contact" class="nav-link"><i class="fa fa-envelope"></i> Contact</a></li>
-          <li><a href="/logout" class="nav-link logout-link"><i class="fa fa-sign-out"></i> Logout</a></li>
+          <li><a href="/notifications" class="nav-link"><i class="fa fa-bell"></i> Notifications</a></li>
+
+          <% if (typeof admin !== 'undefined' && admin && admin.isAdmin) { %>
+            <li><a href="/admin/dashboard" class="nav-link"><i class="fa fa-shield"></i> Admin</a></li>
+          <% } %>
+
+          <% if (isAuthenticated) { %>
+            <li class="dropdown" id="user-dropdown">
+              <a href="#" class="nav-link user-profile" onclick="toggleDropdown(event)">
+                <i class="fa fa-user-circle"></i> 
+                <span class="user-name"><%= user?.name || "User" %></span>
+                <i class="fa fa-chevron-down dropdown-arrow"></i>
+              </a>
+              <ul class="dropdown-menu" id="dropdown-menu">
+                <li class="dropdown-header">
+                  <div class="user-info">
+                    <i class="fa fa-user-circle user-avatar"></i>
+                    <div class="user-details">
+                      <span class="user-name"><%= user?.name || "User" %></span>
+                      <span class="user-email"><%= user?.email || "" %></span>
+                    </div>
+                  </div>
+                </li>
+                <li class="dropdown-divider"></li>
+                <li><a href="/profile"><i class="fa fa-user"></i> Profile</a></li>
+                <li><a href="/settings"><i class="fa fa-cog"></i> Settings</a></li>
+                <li class="dropdown-divider"></li>
+                <li><a href="/logout" class="logout-link"><i class="fa fa-sign-out"></i> Logout</a></li>
+              </ul>
+            </li>
+          <% } else { %>
+            <li><a href="/login" class="nav-link"><i class="fa fa-sign-in"></i> Sign In</a></li>
+            <li><a href="/account" class="nav-link"><i class="fa fa-user-plus"></i> Register</a></li>
+          <% } %>
+
+          <li>
+            <button id="theme-toggle" class="nav-link" onclick="toggleTheme()">
+              <i class="fa fa-moon-o"></i> Dark Mode
+            </button>
+          </li>
         </ul>
       </nav>
     </div>
   </header>
+
+  <div id="toast" class="toast"></div>
+
+  <script>
+    // Close dropdown when clicking on a link
+    document.addEventListener('DOMContentLoaded', function() {
+      const dropdownLinks = document.querySelectorAll('.dropdown-menu a');
+      dropdownLinks.forEach(link => {
+        link.addEventListener('click', function() {
+          const menu = document.getElementById("dropdown-menu");
+          if (menu) {
+            menu.classList.remove("show");
+          }
+        });
+      });
+    });
+  </script>
 </body>
 
 </html>

@@ -1,26 +1,351 @@
 <%- include('partials/header.ejs') %>
 
-<h2>My Wishlist</h2>
+<link rel="stylesheet" href="/styles/wishlist.css" />
+
+<div class="wishlist-container">
+  <div class="page-header">
+    <h2><i class="fa fa-heart"></i> My Wishlist</h2>
+    <p>Books you want to read and explore</p>
+  </div>
 
 <% if (books.length === 0) { %>
-  <p>Your wishlist is empty.</p>
+    <div class="empty-state">
+      <i class="fa fa-heart-broken"></i>
+      <h3>Your Wishlist is Empty</h3>
+      <p>Start adding books to your wishlist to keep track of what you want to read!</p>
+      <a href="/book" class="btn-browse-books">
+        <i class="fa fa-search"></i> Browse Books
+      </a>
+    </div>
 <% } else { %>
-  <div class="books">
+    <div class="wishlist-stats">
+      <div class="stat-card">
+        <i class="fa fa-book"></i>
+        <div class="stat-info">
+          <span class="stat-number"><%= books.length %></span>
+          <span class="stat-label">Books in Wishlist</span>
+        </div>
+      </div>
+      <div class="stat-card">
+        <i class="fa fa-clock-o"></i>
+        <div class="stat-info">
+          <span class="stat-number"><%= books.filter(b => b.added_date).length %></span>
+          <span class="stat-label">Recently Added</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="wishlist-actions">
+      <button class="btn-sort" onclick="toggleSortMenu()">
+        <i class="fa fa-sort"></i> Sort By
+      </button>
+      <div class="sort-menu" id="sortMenu">
+        <button onclick="sortWishlist('title')">Title A-Z</button>
+        <button onclick="sortWishlist('author')">Author A-Z</button>
+        <button onclick="sortWishlist('date')">Date Added</button>
+      </div>
+    </div>
+
+    <div class="books-grid" id="booksGrid">
     <% books.forEach(book => { %>
-      <div class="book">
+        <div class="book-card" data-book-id="<%= book.book_id %>" data-title="<%= book.title.toLowerCase() %>" data-author="<%= book.author.toLowerCase() %>" data-date="<%= book.added_date || '' %>">
+          <div class="book-cover">
+            <% if (book.cover_id === 0 || !book.cover_id) { %>
+              <div class="blank-cover">
+                <i class="fa fa-book"></i>
+                <h3><%= book.title %></h3>
+                <h4>By <%= book.author %></h4>
+              </div>
+            <% } else { %>
             <img src="https://covers.openlibrary.org/b/id/<%= book.cover_id %>-L.jpg"
             srcset="https://covers.openlibrary.org/b/id/<%= book.cover_id %>-L.jpg 2x"
-            alt="Book cover">
-        <h3><%= book.title %></h3>
-        <h4>by <%= book.author %></h4>
-        <p><%= book.review_text || 'No review yet.' %></p>
-        <form action="/wishlist/remove" method="POST">
-          <input type="hidden" name="bookId" value="<%= book.book_id %>">
-          <button type="submit">Remove from Wishlist</button>
-        </form>
-      </div>
-    <% }) %>
-  </div>
-<% } %>
+                   alt="<%= book.title %> cover"
+                   loading="lazy">
+            <% } %>
+            <div class="book-overlay">
+              <div class="book-actions">
+                <button class="btn-add-collection" onclick="addToCollection(<%= book.book_id %>)" title="Add to My Books">
+                  <i class="fa fa-plus"></i>
+                </button>
+                <button class="btn-view-details" onclick="viewBookDetails(<%= book.book_id %>)" title="View Details">
+                  <i class="fa fa-eye"></i>
+                </button>
+                <button class="btn-remove" onclick="removeFromWishlist(<%= book.book_id %>)" title="Remove from Wishlist">
+                  <i class="fa fa-trash"></i>
+                </button>
+              </div>
+            </div>
+            <div class="wishlist-badge">
+              <i class="fa fa-heart"></i>
+            </div>
+          </div>
 
-<%- include('partials/footer') %>
+          <div class="book-details">
+            <h3 class="book-title"><%= book.title %></h3>
+            <h4 class="book-author">By <%= book.author %></h4>
+            
+            <% if (book.review_text) { %>
+              <div class="book-review">
+                <p><%= book.review_text.length > 100 ? book.review_text.substring(0, 100) + '...' : book.review_text %></p>
+              </div>
+            <% } %>
+
+            <div class="book-meta">
+              <% if (book.added_date) { %>
+                <span class="added-date">
+                  <i class="fa fa-calendar-plus-o"></i>
+                  Added <%= new Date(book.added_date).toLocaleDateString() %>
+                </span>
+              <% } %>
+              <span class="book-id">ID: <%= book.book_id %></span>
+            </div>
+          </div>
+        </div>
+      <% }); %>
+    </div>
+  <% } %>
+</div>
+
+<!-- Add to Collection Modal -->
+<div id="addToCollectionModal" class="modal">
+  <div class="modal-content">
+    <div class="modal-header">
+      <h3>Add to My Books</h3>
+      <span class="close">&times;</span>
+    </div>
+    <form id="addToCollectionForm" action="/addBook" method="POST">
+      <input type="hidden" id="modalBookId" name="bookId">
+      <input type="hidden" id="modalBookTitle" name="title">
+      <input type="hidden" id="modalBookAuthor" name="author">
+      <input type="hidden" id="modalBookCoverId" name="cover_id">
+      
+      <div class="form-group">
+        <label for="rating">Rating:</label>
+        <div class="rating-input">
+          <i class="fa fa-star" data-rating="1"></i>
+          <i class="fa fa-star" data-rating="2"></i>
+          <i class="fa fa-star" data-rating="3"></i>
+          <i class="fa fa-star" data-rating="4"></i>
+          <i class="fa fa-star" data-rating="5"></i>
+        </div>
+        <input type="hidden" id="ratingValue" name="rating" value="5">
+      </div>
+
+      <div class="form-group">
+        <label for="review">Review:</label>
+        <textarea id="review" name="review" rows="4" placeholder="Share your thoughts about this book..."></textarea>
+      </div>
+
+      <div class="form-actions">
+        <button type="button" class="btn-cancel" onclick="closeAddModal()">Cancel</button>
+        <button type="submit" class="btn-add">Add to Collection</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<script>
+// Sort functionality
+function toggleSortMenu() {
+  const menu = document.getElementById('sortMenu');
+  menu.classList.toggle('show');
+}
+
+function sortWishlist(criteria) {
+  const grid = document.getElementById('booksGrid');
+  const cards = Array.from(grid.children);
+  
+  cards.sort((a, b) => {
+    let aValue, bValue;
+    
+    switch(criteria) {
+      case 'title':
+        aValue = a.getAttribute('data-title');
+        bValue = b.getAttribute('data-title');
+        break;
+      case 'author':
+        aValue = a.getAttribute('data-author');
+        bValue = b.getAttribute('data-author');
+        break;
+      case 'date':
+        aValue = a.getAttribute('data-date');
+        bValue = b.getAttribute('data-date');
+        break;
+      default:
+        return 0;
+    }
+    
+    if (aValue < bValue) return -1;
+    if (aValue > bValue) return 1;
+    return 0;
+  });
+  
+  // Re-append cards in sorted order
+  cards.forEach(card => grid.appendChild(card));
+  
+  // Hide sort menu
+  document.getElementById('sortMenu').classList.remove('show');
+  
+  showToast(`Wishlist sorted by ${criteria}`, 'success');
+}
+
+// Add to collection functionality
+function addToCollection(bookId) {
+  const bookCard = document.querySelector(`[data-book-id="${bookId}"]`);
+  const title = bookCard.querySelector('.book-title').textContent;
+  const author = bookCard.querySelector('.book-author').textContent.replace('By ', '');
+  const coverId = bookCard.querySelector('img') ? bookCard.querySelector('img').src.match(/\/b\/id\/(\d+)/)?.[1] || 0 : 0;
+  
+  document.getElementById('modalBookId').value = bookId;
+  document.getElementById('modalBookTitle').value = title;
+  document.getElementById('modalBookAuthor').value = author;
+  document.getElementById('modalBookCoverId').value = coverId;
+  
+  // Reset form
+  document.getElementById('review').value = '';
+  document.getElementById('ratingValue').value = 5;
+  
+  // Reset rating stars
+  const ratingStars = document.querySelectorAll('#addToCollectionModal .rating-input .fa-star');
+  ratingStars.forEach((star, index) => {
+    if (index < 4) { // 5 stars default
+      star.classList.add('checked');
+    } else {
+      star.classList.remove('checked');
+    }
+  });
+  
+  document.getElementById('addToCollectionModal').style.display = 'block';
+}
+
+// Remove from wishlist functionality
+function removeFromWishlist(bookId) {
+  if (confirm('Are you sure you want to remove this book from your wishlist?')) {
+    fetch('/wishlist/remove', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/x-www-form-urlencoded',
+      },
+      body: `bookId=${bookId}`
+    })
+    .then(response => response.json())
+    .then(data => {
+      if (data.success) {
+        const bookCard = document.querySelector(`[data-book-id="${bookId}"]`);
+        bookCard.style.animation = 'slideOut 0.3s ease-out';
+        setTimeout(() => {
+          bookCard.remove();
+          if (document.querySelectorAll('.book-card').length === 0) {
+            location.reload(); // Reload to show empty state
+          }
+        }, 300);
+        showToast('Book removed from wishlist', 'success');
+      } else {
+        showToast(data.message || 'Error removing book', 'error');
+      }
+    })
+    .catch(error => {
+      console.error('Error:', error);
+      showToast('Error removing book', 'error');
+    });
+  }
+}
+
+// View book details
+function viewBookDetails(bookId) {
+  // Navigate to book details page or show modal
+  showToast('Book details feature coming soon!', 'info');
+}
+
+// Modal functionality
+function closeAddModal() {
+  document.getElementById('addToCollectionModal').style.display = 'none';
+}
+
+// Rating input functionality
+document.addEventListener('DOMContentLoaded', function() {
+  const ratingStars = document.querySelectorAll('#addToCollectionModal .rating-input .fa-star');
+  
+  ratingStars.forEach(star => {
+    star.addEventListener('click', function() {
+      const rating = this.getAttribute('data-rating');
+      document.getElementById('ratingValue').value = rating;
+      
+      // Update star display
+      ratingStars.forEach((s, index) => {
+        if (index < rating) {
+          s.classList.add('checked');
+        } else {
+          s.classList.remove('checked');
+        }
+      });
+    });
+    
+    star.addEventListener('mouseenter', function() {
+      const rating = this.getAttribute('data-rating');
+      ratingStars.forEach((s, index) => {
+        if (index < rating) {
+          s.classList.add('hover');
+        } else {
+          s.classList.remove('hover');
+        }
+      });
+    });
+    
+    star.addEventListener('mouseleave', function() {
+      ratingStars.forEach(s => s.classList.remove('hover'));
+    });
+  });
+  
+  // Close modal when clicking outside
+  window.onclick = function(event) {
+    const modal = document.getElementById('addToCollectionModal');
+    if (event.target === modal) {
+      closeAddModal();
+    }
+  }
+  
+  // Close modal with X button
+  document.querySelector('#addToCollectionModal .close').onclick = closeAddModal;
+  
+  // Close sort menu when clicking outside
+  document.addEventListener('click', function(event) {
+    const sortMenu = document.getElementById('sortMenu');
+    const sortBtn = document.querySelector('.btn-sort');
+    
+    if (!sortMenu.contains(event.target) && !sortBtn.contains(event.target)) {
+      sortMenu.classList.remove('show');
+    }
+  });
+});
+
+// Form submission
+document.getElementById('addToCollectionForm').addEventListener('submit', function(e) {
+  e.preventDefault();
+  
+  const formData = new FormData(this);
+  
+  fetch('/addBook', {
+    method: 'POST',
+    body: formData
+  })
+  .then(response => response.json())
+  .then(data => {
+    if (data.success) {
+      closeAddModal();
+      showToast('Book added to collection successfully!', 'success');
+      setTimeout(() => {
+        window.location.href = '/myBooks';
+      }, 1500);
+    } else {
+      showToast(data.message || 'Error adding book', 'error');
+    }
+  })
+  .catch(error => {
+    console.error('Error:', error);
+    showToast('Error adding book', 'error');
+  });
+});
+</script>
+
+<%- include('partials/footer.ejs') %>

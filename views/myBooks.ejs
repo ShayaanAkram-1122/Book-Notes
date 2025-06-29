@@ -1,53 +1,320 @@
 <%- include('partials/header.ejs') %>
 
-<h2>My Books</h2>
+<link rel="stylesheet" href="/styles/myBooks.css" />
 
-<% if (books.length === 0) { %>
-  <p>No books saved yet.</p>
-<% } else { %>
-  <div class="books">
-    <% books.forEach(book => { %>
-      <div class="book">
-        <% if (book.cover_id === 0 || !book.cover_id) { %>
-          <div class="blank-cover">
-            <div>
-              <h3><%= book.title %></h3>
-              <h4>By <%= book.author %></h4>
+<div class="my-books-container">
+  <div class="page-header">
+    <h2><i class="fa fa-book"></i> My Books</h2>
+    <p>Manage your personal book collection and reviews</p>
+  </div>
+
+  <% if (books.length === 0) { %>
+    <div class="empty-state">
+      <i class="fa fa-book-open"></i>
+      <h3>No Books Yet</h3>
+      <p>Start building your collection by adding your first book!</p>
+      <a href="/book" class="btn-add-book">
+        <i class="fa fa-plus"></i> Add Your First Book
+      </a>
+    </div>
+  <% } else { %>
+    <div class="books-grid">
+      <% books.forEach(book => { %>
+        <div class="book-card" data-book-id="<%= book.book_id %>">
+          <div class="book-cover">
+            <% if (book.cover_id === 0 || !book.cover_id) { %>
+              <div class="blank-cover">
+                <i class="fa fa-book"></i>
+                <h3><%= book.title %></h3>
+                <h4>By <%= book.author %></h4>
+              </div>
+            <% } else { %>
+              <img src="https://covers.openlibrary.org/b/id/<%= book.cover_id %>-L.jpg"
+                   srcset="https://covers.openlibrary.org/b/id/<%= book.cover_id %>-L.jpg 2x"
+                   alt="<%= book.title %> cover"
+                   loading="lazy">
+            <% } %>
+            <div class="book-actions">
+              <button class="btn-wishlist" onclick="toggleWishlist(<%= book.book_id %>)" 
+                      data-in-wishlist="<%= book.in_wishlist || false %>">
+                <i class="fa fa-heart"></i>
+              </button>
+              <button class="btn-edit" onclick="editBook(<%= book.book_id %>)">
+                <i class="fa fa-edit"></i>
+              </button>
+              <button class="btn-delete" onclick="deleteBook(<%= book.book_id %>)">
+                <i class="fa fa-trash"></i>
+              </button>
             </div>
           </div>
-        <% } else { %>
-          <img src="https://covers.openlibrary.org/b/id/<%= book.cover_id %>-L.jpg"
-               srcset="https://covers.openlibrary.org/b/id/<%= book.cover_id %>-L.jpg 2x"
-               alt="Book cover">
-        <% } %>
 
-        <div class="book-details">
-          <h2><%= book.title %></h2>
-          <h3>By <%= book.author %></h3>
-          <h3>Review:</h3>
-          <p><%= book.review_text %></p>
-          <p><strong>Review Date: </strong><%= book.review_date %></p>
+          <div class="book-details">
+            <h3 class="book-title"><%= book.title %></h3>
+            <h4 class="book-author">By <%= book.author %></h4>
+            
+            <div class="book-rating">
+              <div class="stars">
+                <% for (let i = 0; i < book.rating; i++) { %>
+                  <i class="fa fa-star checked"></i>
+                <% } %>
+                <% for (let i = 0; i < (5 - book.rating); i++) { %>
+                  <i class="fa fa-star"></i>
+                <% } %>
+              </div>
+              <span class="rating-text"><%= book.rating %>/5</span>
+            </div>
 
-          <h3>Rating</h3>
-          <div class="rating">
-            <% for (let i = 0; i < book.rating; i++) { %>
-              <span class="fa fa-star checked"></span>
-            <% } %>
-            <% for (let i = 0; i < (5 - book.rating); i++) { %>
-              <span class="fa fa-star"></span>
-            <% } %>
+            <div class="book-review">
+              <h5>Review:</h5>
+              <p><%= book.review_text || 'No review yet.' %></p>
+            </div>
+
+            <div class="book-meta">
+              <span class="review-date">
+                <i class="fa fa-calendar"></i>
+                <%= new Date(book.review_date).toLocaleDateString() %>
+              </span>
+            </div>
           </div>
-
-          <form action="/wishlist/add" method="POST" style="margin-top: 10px;">
-              <input type="hidden" name="bookId" value="<%= book.book_id %>">
-              <button type="submit" class="btn btn-outline-primary">
-                ❤️ Add to Wishlist
-              </button>
-          </form>
         </div>
+      <% }); %>
+    </div>
+  <% } %>
+</div>
+
+<!-- Edit Book Modal -->
+<div id="editModal" class="modal">
+  <div class="modal-content">
+    <div class="modal-header">
+      <h3>Edit Book Review</h3>
+      <span class="close">&times;</span>
+    </div>
+    <form id="editForm" action="/editBook" method="POST">
+      <input type="hidden" id="editBookId" name="bookId">
+      
+      <div class="form-group">
+        <label for="editRating">Rating:</label>
+        <div class="rating-input">
+          <i class="fa fa-star" data-rating="1"></i>
+          <i class="fa fa-star" data-rating="2"></i>
+          <i class="fa fa-star" data-rating="3"></i>
+          <i class="fa fa-star" data-rating="4"></i>
+          <i class="fa fa-star" data-rating="5"></i>
+        </div>
+        <input type="hidden" id="editRatingValue" name="rating" value="5">
       </div>
-    <% }); %>
+
+      <div class="form-group">
+        <label for="editReview">Review:</label>
+        <textarea id="editReview" name="review" rows="4" placeholder="Share your thoughts about this book..."></textarea>
+      </div>
+
+      <div class="form-actions">
+        <button type="button" class="btn-cancel" onclick="closeModal()">Cancel</button>
+        <button type="submit" class="btn-save">Save Changes</button>
+      </div>
+    </form>
   </div>
-<% } %>
+</div>
+
+<script>
+// Wishlist functionality
+function toggleWishlist(bookId) {
+  const btn = event.target.closest('.btn-wishlist');
+  const isInWishlist = btn.getAttribute('data-in-wishlist') === 'true';
+  
+  const action = isInWishlist ? '/wishlist/remove' : '/wishlist/add';
+  
+  fetch(action, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/x-www-form-urlencoded',
+    },
+    body: `bookId=${bookId}`
+  })
+  .then(response => response.json())
+  .then(data => {
+    if (data.success) {
+      btn.setAttribute('data-in-wishlist', !isInWishlist);
+      btn.classList.toggle('active');
+      showToast(data.message, 'success');
+    } else {
+      showToast(data.message || 'Error updating wishlist', 'error');
+    }
+  })
+  .catch(error => {
+    console.error('Error:', error);
+    showToast('Error updating wishlist', 'error');
+  });
+}
+
+// Edit book functionality
+function editBook(bookId) {
+  const bookCard = document.querySelector(`[data-book-id="${bookId}"]`);
+  const rating = bookCard.querySelector('.stars .checked').length;
+  const review = bookCard.querySelector('.book-review p').textContent;
+  
+  document.getElementById('editBookId').value = bookId;
+  document.getElementById('editRatingValue').value = rating;
+  document.getElementById('editReview').value = review;
+  
+  // Set rating stars
+  const ratingStars = document.querySelectorAll('.rating-input .fa-star');
+  ratingStars.forEach((star, index) => {
+    if (index < rating) {
+      star.classList.add('checked');
+    } else {
+      star.classList.remove('checked');
+    }
+  });
+  
+  document.getElementById('editModal').style.display = 'block';
+}
+
+// Delete book functionality
+function deleteBook(bookId) {
+  if (confirm('Are you sure you want to delete this book from your collection?')) {
+    fetch('/deleteBook', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/x-www-form-urlencoded',
+      },
+      body: `bookId=${bookId}`
+    })
+    .then(response => response.json())
+    .then(data => {
+      if (data.success) {
+        const bookCard = document.querySelector(`[data-book-id="${bookId}"]`);
+        bookCard.style.animation = 'slideOut 0.3s ease-out';
+        setTimeout(() => {
+          bookCard.remove();
+          if (document.querySelectorAll('.book-card').length === 0) {
+            location.reload(); // Reload to show empty state
+          }
+        }, 300);
+        showToast('Book deleted successfully', 'success');
+      } else {
+        showToast(data.message || 'Error deleting book', 'error');
+      }
+    })
+    .catch(error => {
+      console.error('Error:', error);
+      showToast('Error deleting book', 'error');
+    });
+  }
+}
+
+// Modal functionality
+function closeModal() {
+  document.getElementById('editModal').style.display = 'none';
+}
+
+// Rating input functionality
+document.addEventListener('DOMContentLoaded', function() {
+  const ratingStars = document.querySelectorAll('.rating-input .fa-star');
+  
+  ratingStars.forEach(star => {
+    star.addEventListener('click', function() {
+      const rating = this.getAttribute('data-rating');
+      document.getElementById('editRatingValue').value = rating;
+      
+      // Update star display
+      ratingStars.forEach((s, index) => {
+        if (index < rating) {
+          s.classList.add('checked');
+        } else {
+          s.classList.remove('checked');
+        }
+      });
+    });
+    
+    star.addEventListener('mouseenter', function() {
+      const rating = this.getAttribute('data-rating');
+      ratingStars.forEach((s, index) => {
+        if (index < rating) {
+          s.classList.add('hover');
+        } else {
+          s.classList.remove('hover');
+        }
+      });
+    });
+    
+    star.addEventListener('mouseleave', function() {
+      ratingStars.forEach(s => s.classList.remove('hover'));
+    });
+  });
+  
+  // Close modal when clicking outside
+  window.onclick = function(event) {
+    const modal = document.getElementById('editModal');
+    if (event.target === modal) {
+      closeModal();
+    }
+  }
+  
+  // Close modal with X button
+  document.querySelector('.close').onclick = closeModal;
+});
+
+// Form submission
+document.getElementById('editForm').addEventListener('submit', function(e) {
+  e.preventDefault();
+  
+  const bookId = document.getElementById('editBookId').value;
+  const newRating = parseInt(document.getElementById('editRatingValue').value);
+  const newReview = document.getElementById('editReview').value;
+  
+  fetch('/editBook', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/x-www-form-urlencoded',
+    },
+    body: `bookId=${bookId}&rating=${newRating}&review=${encodeURIComponent(newReview)}`
+  })
+  .then(response => response.json())
+  .then(data => {
+    if (data.success) {
+      closeModal();
+      
+      // Update the book card display immediately
+      const bookCard = document.querySelector(`[data-book-id="${bookId}"]`);
+      if (bookCard) {
+        // Update rating display
+        const starsContainer = bookCard.querySelector('.stars');
+        const ratingText = bookCard.querySelector('.rating-text');
+        
+        // Clear existing stars
+        starsContainer.innerHTML = '';
+        
+        // Add new stars
+        for (let i = 0; i < 5; i++) {
+          const star = document.createElement('i');
+          star.className = `fa fa-star ${i < newRating ? 'checked' : ''}`;
+          starsContainer.appendChild(star);
+        }
+        
+        // Update rating text
+        if (ratingText) {
+          ratingText.textContent = `${newRating}/5`;
+        }
+        
+        // Update review text
+        const reviewText = bookCard.querySelector('.book-review p');
+        if (reviewText) {
+          reviewText.textContent = newReview || 'No review yet.';
+        }
+      }
+      
+      showToast('Book updated successfully', 'success');
+    } else {
+      showToast(data.message || 'Error updating book', 'error');
+    }
+  })
+  .catch(error => {
+    console.error('Error:', error);
+    showToast('Error updating book', 'error');
+  });
+});
+</script>
 
 <%- include('partials/footer.ejs') %>

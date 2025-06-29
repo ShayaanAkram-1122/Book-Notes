@@ -1,56 +1,268 @@
 <%- include('partials/header.ejs') %>
 
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <link rel="stylesheet" href="/styles/register.css" />
-  <title>Sign In</title>
-</head>
+<link rel="stylesheet" href="/styles/register.css" />
 
-<div class="login-container">
-  <form action="/login" method="post" class="login-box">
-    <h2>Sign In</h2>
-    <div class="form-group">
-      <label for="email">Email</label>
-      <input type="email" name="email" id="email" required />
+<div class="login-wrapper">
+  <div class="login-container">
+    <div class="login-box">
+      <div class="form-toggle">
+        <button class="toggle-btn active" onclick="switchForm('user')">User Login</button>
+        <button class="toggle-btn" onclick="switchForm('admin')">Admin Login</button>
+      </div>
+
+      <!-- User Login Form -->
+      <form action="/login" method="post" class="login-form" id="user-form">
+        <h2>Sign In as User</h2>
+        <div class="form-group">
+          <label for="email">Email</label>
+          <input type="email" name="email" id="email" required />
+        </div>
+
+        <div class="form-group">
+          <label for="password">Password</label>
+          <input type="password" name="password" id="password" required />
+        </div>
+
+        <div class="form-options">
+          <label>
+            <input type="checkbox" name="remember" />
+            Remember me
+          </label>
+          <a href="/forget-password" class="forget-password">Forget Password?</a>
+        </div>
+
+        <button type="submit">Sign In</button>
+
+        <div class="google-divider">
+          <span>or</span>
+        </div>
+
+        <a href="/auth/google" class="google-btn">
+          <img src="https://developers.google.com/identity/images/g-logo.png" alt="Google logo" />
+          Sign in with Google
+        </a>
+
+        <div class="form-options">
+          <p>Don't have an account? <a href="/account">Create one</a></p>
+        </div>
+      </form>
+
+      <!-- Admin Login Form -->
+      <form action="/admin/login" method="post" class="login-form" id="admin-form" style="display: none;">
+        <h2>Sign In as Admin</h2>
+        <div class="form-group">
+          <label for="admin-username">Username</label>
+          <input type="text" name="username" id="admin-username" required />
+        </div>
+
+        <div class="form-group">
+          <label for="admin-password">Password</label>
+          <input type="password" name="password" id="admin-password" required />
+        </div>
+
+        <div class="form-options">
+          <label>
+            <input type="checkbox" name="remember" />
+            Remember me
+          </label>
+        </div>
+
+        <button type="submit">Admin Sign In</button>
+
+        <div class="form-options">
+          <p>Need admin access? <a href="/account">Register as Admin</a></p>
+        </div>
+      </form>
+
+      <% if (error) { %>
+        <div class="error-message" id="msg"><%= error %></div>
+      <% } %>
+
+      <% if (message) { %>
+        <div class="success-message" id="msg"><%= message %></div>
+      <% } %>
     </div>
-
-    <div class="form-group">
-      <label for="password">Password</label>
-      <input type="password" name="password" id="password" required />
-    </div>
-
-    <div class="form-options">
-      <label>
-        <input type="checkbox" name="remember" />
-        Remember me
-      </label>
-      <a href="/forget-password" class="forget-password">Forget Password?</a>
-    </div>
-
-    <button type="submit">Next</button>
-
-    <div class="form-options">
-      <p>Don't have an account? <a href="/account">Create one</a></p>
-    </div>
-    <% if (error) { %>
-      <div class="error-message" id="msg"><%= error %></div>
-    <% } %>
-
-    <% if (message) { %>
-      <div class="success-message" id="msg"><%= message %></div>
-    <% } %>
-  </form>
+  </div>
 </div>
 
-<script>
+<style>
+.form-toggle {
+  display: flex;
+  margin-bottom: 30px;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 15px;
+  padding: 5px;
+  backdrop-filter: blur(10px);
+}
 
-  setTimeout(() => {
-    const msg = document.getElementById("msg");
-    if (msg) {
+.toggle-btn {
+  flex: 1;
+  padding: 12px 20px;
+  border: none;
+  background: transparent;
+  color: rgba(255, 255, 255, 0.7);
+  border-radius: 10px;
+  cursor: pointer;
+  font-weight: 600;
+  transition: all 0.3s ease;
+}
+
+.toggle-btn.active {
+  background: rgba(255, 255, 255, 0.2);
+  color: white;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+}
+
+.toggle-btn:hover {
+  color: white;
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.login-form {
+  transition: all 0.3s ease;
+}
+
+.login-form h2 {
+  text-align: center;
+  margin-bottom: 30px;
+  color: white;
+  font-size: 24px;
+  font-weight: 700;
+}
+
+.google-divider {
+  text-align: center;
+  margin: 20px 0;
+  position: relative;
+}
+
+.google-divider span {
+  background: rgba(255, 255, 255, 0.9);
+  padding: 0 15px;
+  color: #7f8c8d;
+  font-weight: 600;
+  backdrop-filter: blur(10px);
+}
+
+.google-divider::before {
+  content: "";
+  display: block;
+  height: 1px;
+  background: rgba(255, 255, 255, 0.3);
+  position: absolute;
+  top: 50%;
+  left: 0;
+  right: 0;
+  z-index: 0;
+}
+
+.google-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  text-decoration: none;
+  padding: 15px 20px;
+  background: rgba(255, 255, 255, 0.9);
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  color: #2c3e50;
+  border-radius: 25px;
+  font-weight: 600;
+  transition: all 0.3s ease;
+  backdrop-filter: blur(10px);
+  margin: 10px 0;
+}
+
+.google-btn img {
+  height: 24px;
+  width: auto;
+}
+
+.google-btn:hover {
+  background: rgba(255, 255, 255, 1);
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+  border-color: #f39c12;
+}
+
+.forget-password {
+  color: #f39c12;
+  text-decoration: none;
+  font-weight: 600;
+  transition: all 0.3s ease;
+}
+
+.forget-password:hover {
+  color: #e67e22;
+  text-decoration: underline;
+}
+
+.error-message {
+  background: linear-gradient(135deg, #e74c3c, #c0392b);
+  color: white;
+  padding: 15px;
+  border-radius: 15px;
+  margin: 15px 0;
+  text-align: center;
+  font-weight: 600;
+  box-shadow: 0 8px 25px rgba(231, 76, 60, 0.3);
+  animation: slideIn 0.3s ease-out;
+}
+
+.success-message {
+  background: linear-gradient(135deg, #27ae60, #2ecc71);
+  color: white;
+  padding: 15px;
+  border-radius: 15px;
+  margin: 15px 0;
+  text-align: center;
+  font-weight: 600;
+  box-shadow: 0 8px 25px rgba(39, 174, 96, 0.3);
+  animation: slideIn 0.3s ease-out;
+}
+
+@keyframes slideIn {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+</style>
+
+<script>
+function switchForm(type) {
+  const userForm = document.getElementById('user-form');
+  const adminForm = document.getElementById('admin-form');
+  const userBtn = document.querySelector('.toggle-btn:first-child');
+  const adminBtn = document.querySelector('.toggle-btn:last-child');
+
+  if (type === 'user') {
+    userForm.style.display = 'block';
+    adminForm.style.display = 'none';
+    userBtn.classList.add('active');
+    adminBtn.classList.remove('active');
+  } else {
+    userForm.style.display = 'none';
+    adminForm.style.display = 'block';
+    userBtn.classList.remove('active');
+    adminBtn.classList.add('active');
+  }
+}
+
+setTimeout(() => {
+  const msg = document.getElementById("msg");
+  if (msg) {
+    msg.style.opacity = "0";
+    msg.style.transform = "translateY(-10px)";
+    setTimeout(() => {
       msg.style.display = "none";
-    }
-  }, 2500);
+    }, 300);
+  }
+}, 3000);
 </script>
 
 <%- include('partials/footer.ejs') %>

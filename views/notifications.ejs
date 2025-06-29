@@ -1,0 +1,244 @@
+<%- include('partials/header.ejs') %>
+
+<link rel="stylesheet" href="/styles/notifications.css" />
+
+<div class="notifications-container">
+  <div class="notifications-header">
+    <h2><i class="fa fa-bell"></i> Notifications</h2>
+    <div class="notification-actions">
+      <button class="btn-mark-all-read" onclick="markAllAsRead()">
+        <i class="fa fa-check-double"></i> Mark All as Read
+      </button>
+      <button class="btn-clear-all" onclick="clearAllNotifications()">
+        <i class="fa fa-trash"></i> Clear All
+      </button>
+    </div>
+  </div>
+
+  <div class="notifications-filters">
+    <button class="filter-btn active" data-filter="all">All</button>
+    <button class="filter-btn" data-filter="unread">Unread</button>
+    <button class="filter-btn" data-filter="books">Books</button>
+    <button class="filter-btn" data-filter="wishlist">Wishlist</button>
+    <button class="filter-btn" data-filter="system">System</button>
+  </div>
+
+  <div class="notifications-list" id="notifications-list">
+    <% if (notifications && notifications.length > 0) { %>
+      <% notifications.forEach(notification => { %>
+        <div class="notification-item <%= !notification.is_read ? 'unread' : '' %>" 
+             data-type="<%= notification.type %>" 
+             data-notification-id="<%= notification.notification_id %>">
+          <div class="notification-icon">
+            <i class="fa fa-<%= getIconForType(notification.type) %>"></i>
+          </div>
+          <div class="notification-content">
+            <div class="notification-header">
+              <h4><%= notification.title %></h4>
+              <span class="notification-time"><%= notification.timeAgo %></span>
+            </div>
+            <p><%= notification.message %></p>
+            <div class="notification-actions">
+              <% if (notification.related_id && notification.related_type) { %>
+                <button class="btn-view" onclick="viewRelated('<%= notification.related_type %>', <%= notification.related_id %>)">
+                  View Details
+                </button>
+              <% } %>
+              <button class="btn-mark-read" onclick="markAsRead(<%= notification.notification_id %>)">
+                Mark as Read
+              </button>
+            </div>
+          </div>
+        </div>
+      <% }); %>
+    <% } else { %>
+      <div class="no-notifications" id="no-notifications">
+        <div class="empty-state">
+          <i class="fa fa-bell-slash"></i>
+          <h3>No Notifications</h3>
+          <p>You're all caught up! Check back later for new updates.</p>
+        </div>
+      </div>
+    <% } %>
+  </div>
+</div>
+
+<script>
+// Helper function to get icon for notification type
+function getIconForType(type) {
+  switch(type) {
+    case 'books': return 'book';
+    case 'wishlist': return 'heart';
+    case 'system': return 'cog';
+    default: return 'bell';
+  }
+}
+
+// Filter functionality
+document.addEventListener('DOMContentLoaded', function() {
+  const filterBtns = document.querySelectorAll('.filter-btn');
+  
+  filterBtns.forEach(btn => {
+    btn.addEventListener('click', function() {
+      // Remove active class from all buttons
+      filterBtns.forEach(b => b.classList.remove('active'));
+      // Add active class to clicked button
+      this.classList.add('active');
+      
+      const filter = this.getAttribute('data-filter');
+      filterNotifications(filter);
+    });
+  });
+});
+
+function filterNotifications(filter) {
+  const notificationItems = document.querySelectorAll('.notification-item');
+  let visibleCount = 0;
+  
+  notificationItems.forEach(item => {
+    const type = item.getAttribute('data-type');
+    const isUnread = item.classList.contains('unread');
+    
+    let shouldShow = false;
+    
+    switch(filter) {
+      case 'all':
+        shouldShow = true;
+        break;
+      case 'unread':
+        shouldShow = isUnread;
+        break;
+      case 'books':
+        shouldShow = type === 'books';
+        break;
+      case 'wishlist':
+        shouldShow = type === 'wishlist';
+        break;
+      case 'system':
+        shouldShow = type === 'system';
+        break;
+    }
+    
+    if (shouldShow) {
+      item.style.display = 'flex';
+      visibleCount++;
+    } else {
+      item.style.display = 'none';
+    }
+  });
+  
+  // Show/hide empty state
+  const noNotifications = document.getElementById('no-notifications');
+  if (visibleCount === 0) {
+    if (noNotifications) {
+      noNotifications.style.display = 'block';
+    }
+  } else {
+    if (noNotifications) {
+      noNotifications.style.display = 'none';
+    }
+  }
+}
+
+function markAsRead(notificationId) {
+  fetch('/notifications/mark-read', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/x-www-form-urlencoded',
+    },
+    body: `notificationId=${notificationId}`
+  })
+  .then(response => response.json())
+  .then(data => {
+    if (data.success) {
+      const notification = document.querySelector(`[data-notification-id="${notificationId}"]`);
+      if (notification) {
+        notification.classList.remove('unread');
+      }
+      showToast('Notification marked as read', 'success');
+    } else {
+      showToast(data.message || 'Error marking notification as read', 'error');
+    }
+  })
+  .catch(error => {
+    console.error('Error:', error);
+    showToast('Error marking notification as read', 'error');
+  });
+}
+
+function markAllAsRead() {
+  fetch('/notifications/mark-all-read', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/x-www-form-urlencoded',
+    }
+  })
+  .then(response => response.json())
+  .then(data => {
+    if (data.success) {
+      const unreadNotifications = document.querySelectorAll('.notification-item.unread');
+      unreadNotifications.forEach(notification => {
+        notification.classList.remove('unread');
+      });
+      showToast('All notifications marked as read', 'success');
+    } else {
+      showToast(data.message || 'Error marking notifications as read', 'error');
+    }
+  })
+  .catch(error => {
+    console.error('Error:', error);
+    showToast('Error marking notifications as read', 'error');
+  });
+}
+
+function clearAllNotifications() {
+  if (confirm('Are you sure you want to clear all notifications?')) {
+    fetch('/notifications/clear-all', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/x-www-form-urlencoded',
+      }
+    })
+    .then(response => response.json())
+    .then(data => {
+      if (data.success) {
+        const notificationsList = document.getElementById('notifications-list');
+        notificationsList.innerHTML = `
+          <div class="no-notifications" id="no-notifications">
+            <div class="empty-state">
+              <i class="fa fa-bell-slash"></i>
+              <h3>No Notifications</h3>
+              <p>You're all caught up! Check back later for new updates.</p>
+            </div>
+          </div>
+        `;
+        showToast('All notifications cleared', 'success');
+      } else {
+        showToast(data.message || 'Error clearing notifications', 'error');
+      }
+    })
+    .catch(error => {
+      console.error('Error:', error);
+      showToast('Error clearing notifications', 'error');
+    });
+  }
+}
+
+function viewRelated(type, id) {
+  switch(type) {
+    case 'book':
+      window.location.href = `/book?id=${id}`;
+      break;
+    case 'wishlist':
+      window.location.href = '/wishlist';
+      break;
+    case 'review':
+      window.location.href = `/myBooks`;
+      break;
+    default:
+      showToast('Viewing details...', 'info');
+  }
+}
+</script>
+
+<%- include('partials/footer.ejs') %> 

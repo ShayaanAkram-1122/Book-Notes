@@ -1,48 +1,180 @@
 <%- include('partials/header.ejs') %>
 
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <link rel="stylesheet" href="/styles/register.css" />
-</head>
+<link rel="stylesheet" href="/styles/register.css" />
 
-<div class="login-container">
-  <form action="/" method="post" class="login-box">
-    <h2>Register Yourself</h2>
+<div class="login-wrapper">
+  <div class="login-container">
+    <div class="login-box">
+      <div class="form-toggle">
+        <button class="toggle-btn active" onclick="switchForm('user')">User Registration</button>
+        <button class="toggle-btn" onclick="switchForm('admin')">Admin Registration</button>
+      </div>
 
-    <div class="form-group">
-      <label for="name">Full Name</label>
-      <input type="text" name="name" id="name" required />
+      <!-- User Registration Form -->
+      <form action="/" method="post" class="registration-form" id="user-form">
+        <h2>Register as User</h2>
+
+        <div class="form-group">
+          <label for="name">Full Name</label>
+          <input type="text" name="name" id="name" required />
+        </div>
+
+        <div class="form-group">
+          <label for="email">Email</label>
+          <input type="email" name="email" id="email" required />
+        </div>
+
+        <div class="form-group">
+          <label for="phone">Phone Number</label>
+          <input type="text" name="phone" id="phone" required />
+        </div>
+
+        <div class="form-group">
+          <label for="password">Password</label>
+          <input type="password" name="password" id="password" required />
+        </div>
+
+        <div class="form-options">
+          <label>
+            <input type="checkbox" name="remember" />
+            Remember me
+          </label>
+        </div>
+
+        <button type="submit">Create User Account</button>
+
+        <div class="form-footer">
+          <p>Already have an account? <a href="/login">Sign in</a></p>
+        </div>
+      </form>
+
+      <!-- Admin Registration Form -->
+      <form action="/admin/register" method="post" class="registration-form" id="admin-form" style="display: none;">
+        <h2>Register as Admin</h2>
+
+        <div class="form-group">
+          <label for="admin-name">Full Name</label>
+          <input type="text" name="name" id="admin-name" required />
+        </div>
+
+        <div class="form-group">
+          <label for="admin-email">Email</label>
+          <input type="email" name="email" id="admin-email" required />
+        </div>
+
+        <div class="form-group">
+          <label for="admin-username">Admin Username</label>
+          <input type="text" name="username" id="admin-username" required />
+        </div>
+
+        <div class="form-group">
+          <label for="admin-password">Password</label>
+          <input type="password" name="password" id="admin-password" required />
+        </div>
+
+        <div class="form-group">
+          <label for="admin-confirm-password">Confirm Password</label>
+          <input type="password" name="confirmPassword" id="admin-confirm-password" required />
+        </div>
+
+        <div class="form-group">
+          <label for="admin-code">Admin Code</label>
+          <input type="password" name="adminCode" id="admin-code" required placeholder="Enter admin registration code" />
+        </div>
+
+        <button type="submit">Create Admin Account</button>
+
+        <div class="form-footer">
+          <p>Already have an admin account? <a href="/login">Sign in</a></p>
+        </div>
+      </form>
     </div>
-
-    <div class="form-group">
-      <label for="email">Email</label>
-      <input type="email" name="email" id="email" required />
-    </div>
-
-    <div class="form-group">
-      <label for="phone">Phone Number</label>
-      <input type="text" name="phone" id="phone" required />
-    </div>
-
-    <div class="form-group">
-      <label for="password">Password</label>
-      <input type="password" name="password" id="password" required />
-    </div>
-
-    <div class="form-options">
-      <label>
-        <input type="checkbox" name="remember" />
-        Remember me
-      </label>
-    </div>
-
-    <button type="submit">Create Account</button>
-
-    <div class="form-footer">
-      <p>Already have an account? <a href="/login">Sign in</a></p>
-    </div>
-  </form>
+  </div>
 </div>
+
+<style>
+.form-toggle {
+  display: flex;
+  margin-bottom: 30px;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 15px;
+  padding: 5px;
+  backdrop-filter: blur(10px);
+}
+
+.toggle-btn {
+  flex: 1;
+  padding: 12px 20px;
+  border: none;
+  background: transparent;
+  color: rgba(255, 255, 255, 0.7);
+  border-radius: 10px;
+  cursor: pointer;
+  font-weight: 600;
+  transition: all 0.3s ease;
+}
+
+.toggle-btn.active {
+  background: rgba(255, 255, 255, 0.2);
+  color: white;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+}
+
+.toggle-btn:hover {
+  color: white;
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.registration-form {
+  transition: all 0.3s ease;
+}
+
+.registration-form h2 {
+  text-align: center;
+  margin-bottom: 30px;
+  color: white;
+  font-size: 24px;
+  font-weight: 700;
+}
+</style>
+
+<script>
+function switchForm(type) {
+  const userForm = document.getElementById('user-form');
+  const adminForm = document.getElementById('admin-form');
+  const userBtn = document.querySelector('.toggle-btn:first-child');
+  const adminBtn = document.querySelector('.toggle-btn:last-child');
+
+  if (type === 'user') {
+    userForm.style.display = 'block';
+    adminForm.style.display = 'none';
+    userBtn.classList.add('active');
+    adminBtn.classList.remove('active');
+  } else {
+    userForm.style.display = 'none';
+    adminForm.style.display = 'block';
+    userBtn.classList.remove('active');
+    adminBtn.classList.add('active');
+  }
+}
+
+// Validate admin form
+document.getElementById('admin-form').addEventListener('submit', function(e) {
+  const password = document.getElementById('admin-password').value;
+  const confirmPassword = document.getElementById('admin-confirm-password').value;
+  
+  if (password !== confirmPassword) {
+    e.preventDefault();
+    alert('Passwords do not match!');
+    return false;
+  }
+  
+  if (password.length < 6) {
+    e.preventDefault();
+    alert('Password must be at least 6 characters long!');
+    return false;
+  }
+});
+</script>
 
 <%- include('partials/footer.ejs') %>
